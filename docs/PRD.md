@@ -61,7 +61,8 @@ Goals:
    constant can set.
 5. A conversation log with a retention setting. The plugin never deletes
    log rows on its own. Only an administrator, by an explicit action,
-   deletes them.
+   deletes them. A reader-facing "forget this conversation" control may
+   hide a conversation from the widget; it never deletes a row (case 86).
 6. A pluggable model caller. A built-in streaming caller for any
    OpenAI-compatible chat completions endpoint over the WordPress HTTP API,
    an optional buffered caller through `indianopinion/llm-json-php`, and a
@@ -489,6 +490,25 @@ Nothing is streamed and no model is called.
     conversation (no history), and the `meta` event says `"history":
     false`.
 
+### 4.11 Reader "forget" control
+
+86. The widget offers "Forget this conversation". It calls the forget
+    route with the session token and the conversation id. The server
+    checks the session owns the conversation, sets a "hidden from widget"
+    flag on the conversation row, clears the working history (case 29),
+    and returns 200 `{"forgotten": true}`. After that the conversation id
+    gives 404 `conversation_unknown` and the widget starts a new one. The
+    control never deletes, edits or blanks any log row, message text or
+    audit entry. It does not lower any counter, so it cannot be used to
+    reset a limit. The administrator's log screen still shows the
+    conversation, marked "hidden by reader", and only the administrator
+    actions in case 71 can delete it. The reader is told in the widget
+    that the conversation is hidden from the chat and that the site keeps
+    its own record for the period in the privacy notice. A hide request
+    for an unknown conversation or another session's conversation gets 404
+    and changes nothing. It is subject to the origin check (case 12) and
+    the per-IP limit.
+
 ## 5. Public interface
 
 ### 5.1 HTTP endpoints
@@ -500,6 +520,7 @@ no-store, private` and `X-Robots-Tag: noindex`.
 |---|---|---|---|
 | `/session` | POST | `{}` | 200 `{"session": "...", "expires": 1731600000, "configured": true, "strings": {...}, "limits": {"message_chars": 1000}}` |
 | `/stream` | POST | `{"session", "conversation", "message", "context_post"}` | 200 `text/event-stream` (or JSON, case 47) |
+| `/forget` | POST | `{"session", "conversation"}` | 200 `{"forgotten": true}` (hides only, case 86) |
 
 The stream callback takes over output and exits; it does not return a
 REST response object once streaming starts.
@@ -601,7 +622,7 @@ citations, tokens), `sse_chat_request_refused` (code, ip hash),
 |---|---|---|---|
 | Option `sse_chat_settings` | Settings (autoload on, no key) | n/a | Removed |
 | Option `sse_chat_api_key` | Key when stored (autoload off) | n/a | Removed |
-| Table `{prefix}sse_chat_conversations` | id, session hash, user id, ip hash, context post, started, last activity, turns, outcome | Retention setting marks rows eligible; only an administrator deletes | Kept unless opted in |
+| Table `{prefix}sse_chat_conversations` | id, session hash, user id, ip hash, context post, started, last activity, turns, outcome, hidden-by-reader flag and time | Retention setting marks rows eligible; only an administrator deletes | Kept unless opted in |
 | Table `{prefix}sse_chat_messages` | id, conversation id, role, text (mode `full`), retrieved post ids, cited post ids, outcome code, model, input and output tokens, latency to first token and total, created | Same | Same |
 | Table `{prefix}sse_chat_audit` | Deletions and kill switch changes | Never deleted by the plugin | Same as log |
 | Table `{prefix}sse_chat_counters` | Bucket key, window start, count; daily totals | Rate windows pruned when expired; daily totals 400 days | Removed |
@@ -865,6 +886,11 @@ widget script has a small DOM test with a fake stream.
   false`. (85)
 - T70. Retriever and keyword fallback both throwing: no-context path.
   (80)
+- T71. Forget: the conversation is hidden from the widget (404 on reuse),
+  working history is cleared, row counts in the conversations, messages
+  and audit tables are unchanged and message text is intact, the log
+  screen shows "hidden by reader", counters are not lowered, another
+  session's id gets 404 with no change. (86)
 
 ## 13. Open questions
 
@@ -892,7 +918,8 @@ Answered by the builder in `docs/ARCHITECTURE.md`.
 - Q8. Personal data export and erasure for anonymous readers, who have no
   account: is a reader-facing "forget this conversation" control needed,
   and how does it square with the rule that only an administrator deletes
-  log rows?
+  log rows? Settled in the PRD: the control hides, it never deletes
+  (case 86). The builder confirms the wording shown to the reader.
 - Q9. Should the IP hash key rotate (for example yearly), trading
   long-term abuse grouping for privacy?
 
@@ -943,3 +970,6 @@ Written as rules. Each one cost real time once.
     open spends without a cap.
 17. Logs are deleted by people, not by timers. A retention setting tells
     the administrator what is due; the administrator decides.
+18. A reader's "forget" control hides; it does not delete. Hiding a
+    conversation from the widget and removing its rows are different acts,
+    and only the administrator may do the second.

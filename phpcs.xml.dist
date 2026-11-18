@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<ruleset name="sse-chat-widget">
+    <description>PSR-12 for the plugin code.</description>
+    <file>src</file>
+    <file>tests</file>
+    <file>sse-chat-widget.php</file>
+    <file>uninstall.php</file>
+    <file>autoload.php</file>
+    <file>mu-plugin</file>
+    <file>examples</file>
+    <exclude-pattern>tests/stubs/*</exclude-pattern>
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
+    <arg value="sp"/>
+    <rule ref="PSR12">
+        <exclude name="Generic.Files.LineLength"/>
+    </rule>
+    <!-- The plugin entry files declare constants and hooks, which is their job. -->
+    <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
+        <exclude-pattern>sse-chat-widget.php</exclude-pattern>
+        <exclude-pattern>autoload.php</exclude-pattern>
+        <exclude-pattern>uninstall.php</exclude-pattern>
+        <exclude-pattern>mu-plugin/*</exclude-pattern>
+        <exclude-pattern>examples/*</exclude-pattern>
+        <exclude-pattern>tests/bootstrap.php</exclude-pattern>
+    </rule>
+    <rule ref="PSR1.Methods.CamelCapsMethodName.NotCamelCaps">
+        <exclude-pattern>tests/*</exclude-pattern>
+    </rule>
+</ruleset>

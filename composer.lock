@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "653a0678421fe7a12808fc05134ca59d",
+    "content-hash": "0553e11576ced8aee7d59d41511bb4d7",
     "packages": [],
     "packages-dev": [
         {
@@ -152,8 +152,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-11T10:17:44+00:00",
-            "published-time": "2026-08-11T10:29:20+00:00"
+            "time": "2026-08-11T10:17:44+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -210,8 +209,7 @@
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
                 "source": "https://github.com/nikic/PHP-Parser/tree/v5.9.0"
             },
-            "time": "2026-09-13T18:51:52+00:00",
-            "published-time": "2026-09-13T18:53:16+00:00"
+            "time": "2026-09-13T18:51:52+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -278,8 +276,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-03-03T12:33:53+00:00",
-            "published-time": "2024-03-03T12:39:44+00:00"
+            "time": "2024-03-03T12:33:53+00:00"
         },
         {
             "name": "phar-io/version",
@@ -330,8 +327,7 @@
                 "issues": "https://github.com/phar-io/version/issues",
                 "source": "https://github.com/phar-io/version/tree/3.2.1"
             },
-            "time": "2022-02-21T01:04:05+00:00",
-            "published-time": "2022-02-21T01:04:30+00:00"
+            "time": "2022-02-21T01:04:05+00:00"
         },
         {
             "name": "php-stubs/wordpress-stubs",
@@ -383,8 +379,7 @@
                 "issues": "https://github.com/php-stubs/wordpress-stubs/issues",
                 "source": "https://github.com/php-stubs/wordpress-stubs/tree/v6.9.4"
             },
-            "time": "2026-05-01T20:36:01+00:00",
-            "published-time": "2026-05-21T21:46:34+00:00"
+            "time": "2026-05-01T20:36:01+00:00"
         },
         {
             "name": "php-stubs/wp-cli-stubs",
@@ -428,8 +423,7 @@
                 "issues": "https://github.com/php-stubs/wp-cli-stubs/issues",
                 "source": "https://github.com/php-stubs/wp-cli-stubs/tree/v2.12.0"
             },
-            "time": "2025-06-10T09:58:05+00:00",
-            "published-time": "2025-06-10T09:59:35+00:00"
+            "time": "2025-06-10T09:58:05+00:00"
         },
         {
             "name": "phpstan/phpstan",
@@ -493,8 +487,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-03T12:14:22+00:00",
-            "published-time": "2026-11-03T12:14:36+00:00"
+            "time": "2026-11-03T12:14:22+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -572,8 +565,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-08-22T04:31:57+00:00",
-            "published-time": "2024-08-22T04:32:20+00:00"
+            "time": "2024-08-22T04:31:57+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -634,8 +626,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-08-31T06:24:48+00:00",
-            "published-time": "2023-08-31T06:25:42+00:00"
+            "time": "2023-08-31T06:24:48+00:00"
         },
         {
             "name": "phpunit/php-invoker",
@@ -698,8 +689,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-02-03T06:56:09+00:00",
-            "published-time": "2023-02-03T06:56:14+00:00"
+            "time": "2023-02-03T06:56:09+00:00"
         },
         {
             "name": "phpunit/php-text-template",
@@ -759,8 +749,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-08-31T14:07:24+00:00",
-            "published-time": "2023-08-31T14:08:05+00:00"
+            "time": "2023-08-31T14:07:24+00:00"
         },
         {
             "name": "phpunit/php-timer",
@@ -819,8 +808,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-02-03T06:57:52+00:00",
-            "published-time": "2023-02-03T06:57:58+00:00"
+            "time": "2023-02-03T06:57:52+00:00"
         },
         {
             "name": "phpunit/phpunit",
@@ -913,8 +901,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-11-13T11:07:03+00:00",
-            "published-time": "2026-11-13T11:07:54+00:00"
+            "time": "2026-11-13T11:07:03+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -971,8 +958,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-03-02T07:12:49+00:00",
-            "published-time": "2024-03-02T07:13:18+00:00"
+            "time": "2024-03-02T07:12:49+00:00"
         },
         {
             "name": "sebastian/code-unit",
@@ -1028,8 +1014,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-02-03T06:58:43+00:00",
-            "published-time": "2023-02-03T06:58:49+00:00"
+            "time": "2023-02-03T06:58:43+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
@@ -1084,8 +1069,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-02-03T06:59:15+00:00",
-            "published-time": "2023-02-03T06:59:20+00:00"
+            "time": "2023-02-03T06:59:15+00:00"
         },
         {
             "name": "sebastian/comparator",
@@ -1174,8 +1158,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-01-24T09:25:16+00:00",
-            "published-time": "2026-01-24T09:25:27+00:00"
+            "time": "2026-01-24T09:25:16+00:00"
         },
         {
             "name": "sebastian/complexity",
@@ -1233,8 +1216,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-12-21T08:37:17+00:00",
-            "published-time": "2023-12-21T08:37:41+00:00"
+            "time": "2023-12-21T08:37:17+00:00"
         },
         {
             "name": "sebastian/diff",
@@ -1301,8 +1283,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-03-02T07:15:17+00:00",
-            "published-time": "2024-03-02T07:15:52+00:00"
+            "time": "2024-03-02T07:15:17+00:00"
         },
         {
             "name": "sebastian/environment",
@@ -1366,8 +1347,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-03-23T08:47:14+00:00",
-            "published-time": "2024-03-23T08:48:26+00:00"
+            "time": "2024-03-23T08:47:14+00:00"
         },
         {
             "name": "sebastian/exporter",
@@ -1457,8 +1437,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-09-24T06:09:11+00:00",
-            "published-time": "2025-09-24T06:10:37+00:00"
+            "time": "2025-09-24T06:09:11+00:00"
         },
         {
             "name": "sebastian/global-state",
@@ -1520,8 +1499,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-03-02T07:19:19+00:00",
-            "published-time": "2024-03-02T07:19:49+00:00"
+            "time": "2024-03-02T07:19:19+00:00"
         },
         {
             "name": "sebastian/lines-of-code",
@@ -1579,8 +1557,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-12-21T08:38:20+00:00",
-            "published-time": "2023-12-21T08:38:54+00:00"
+            "time": "2023-12-21T08:38:20+00:00"
         },
         {
             "name": "sebastian/object-enumerator",
@@ -1637,8 +1614,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-02-03T07:08:32+00:00",
-            "published-time": "2023-02-03T07:08:37+00:00"
+            "time": "2023-02-03T07:08:32+00:00"
         },
         {
             "name": "sebastian/object-reflector",
@@ -1693,8 +1669,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-02-03T07:06:18+00:00",
-            "published-time": "2023-02-03T07:06:24+00:00"
+            "time": "2023-02-03T07:06:18+00:00"
         },
         {
             "name": "sebastian/recursion-context",
@@ -1770,8 +1745,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-11T05:27:39+00:00",
-            "published-time": "2026-08-11T05:28:01+00:00"
+            "time": "2026-08-11T05:27:39+00:00"
         },
         {
             "name": "sebastian/type",
@@ -1827,8 +1801,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-02-03T07:10:45+00:00",
-            "published-time": "2023-02-03T07:10:50+00:00"
+            "time": "2023-02-03T07:10:45+00:00"
         },
         {
             "name": "sebastian/version",
@@ -1881,31 +1854,35 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-02-07T11:34:05+00:00",
-            "published-time": "2023-02-07T11:34:22+00:00"
+            "time": "2023-02-07T11:34:05+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.13.6",
+            "version": "4.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "4c378e1a528ea066890fc2397cbdd2f94eb2fc91"
+                "reference": "bbdc3d0532623e21838b7041a4364383a8126f96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/4c378e1a528ea066890fc2397cbdd2f94eb2fc91",
-                "reference": "4c378e1a528ea066890fc2397cbdd2f94eb2fc91",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/bbdc3d0532623e21838b7041a4364383a8126f96",
+                "reference": "bbdc3d0532623e21838b7041a4364383a8126f96",
                 "shasum": ""
             },
             "require": {
+                "ext-libxml": "*",
                 "ext-simplexml": "*",
                 "ext-tokenizer": "*",
                 "ext-xmlwriter": "*",
-                "php": ">=5.4.0"
+                "php": ">=7.2.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^4.0 || ^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.3.4"
+                "phpunit/phpunit": "^8.4.0 || ^9.3.4 || ^10.5.32 || 11.3.3 - 11.5.28 || ^11.5.31"
+            },
+            "suggest": {
+                "ext-iconv": "For accurate character length calculation when the checked files contain multi-byte characters.",
+                "ext-pcntl": "For parallel processing support via the --parallel CLI option."
             },
             "bin": [
                 "bin/phpcbf",
@@ -1930,7 +1907,7 @@
                     "homepage": "https://github.com/PHPCSStandards/PHP_CodeSniffer/graphs/contributors"
                 }
             ],
-            "description": "PHP_CodeSniffer tokenizes PHP, JavaScript and CSS files and detects violations of a defined set of coding standards.",
+            "description": "PHP_CodeSniffer tokenizes PHP files and detects violations of a defined set of coding standards.",
             "homepage": "https://github.com/PHPCSStandards/PHP_CodeSniffer",
             "keywords": [
                 "phpcs",
@@ -1961,8 +1938,7 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2026-08-06T00:17:32+00:00",
-            "published-time": "2026-08-06T01:05:02+00:00"
+            "time": "2026-08-06T02:45:27+00:00"
         },
         {
             "name": "theseer/tokenizer",
@@ -2012,8 +1988,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-11-17T20:03:58+00:00",
-            "published-time": "2025-11-17T20:04:52+00:00"
+            "time": "2025-11-17T20:03:58+00:00"
         }
     ],
     "aliases": [],
@@ -2027,5 +2002,5 @@
         "ext-mbstring": "*"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.11.0"
+    "plugin-api-version": "2.9.0"
 }

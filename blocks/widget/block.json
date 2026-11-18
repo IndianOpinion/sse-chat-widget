@@ -1,0 +1,17 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "sse-chat/widget",
+    "title": "Chat widget",
+    "category": "widgets",
+    "icon": "format-chat",
+    "description": "A chat box that answers from this site's published posts.",
+    "textdomain": "sse-chat-widget",
+    "attributes": {
+        "title": { "type": "string", "default": "" },
+        "greeting": { "type": "string", "default": "" },
+        "context": { "type": "string", "enum": ["auto", "none"], "default": "auto" }
+    },
+    "supports": { "html": false },
+    "editorScript": "file:./editor.js"
+}

@@ -1,0 +1,65 @@
+{
+    "name": "indianopinion/sse-chat-widget",
+    "description": "WordPress chat widget over your own published posts. Streams answers with Server-Sent Events; the prompt, the model and the retrieval stay on the server, with rate limits, a daily cap, a kill switch and a conversation log.",
+    "type": "wordpress-plugin",
+    "license": "MIT",
+    "keywords": ["wordpress", "chat", "server-sent-events", "sse", "retrieval", "llm", "rate-limit"],
+    "homepage": "https://github.com/IndianOpinion/sse-chat-widget",
+    "support": {
+        "issues": "https://github.com/IndianOpinion/sse-chat-widget/issues",
+        "source": "https://github.com/IndianOpinion/sse-chat-widget",
+        "email": "hello@indianopinion.org"
+    },
+    "authors": [
+        {
+            "name": "Indian Opinion",
+            "email": "hello@indianopinion.org",
+            "homepage": "https://indianopinion.org"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/IndianOpinion/llm-json-php"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "ext-json": "*",
+        "ext-mbstring": "*"
+    },
+    "require-dev": {
+        "indianopinion/llm-json-php": "^0.1",
+        "php-stubs/wordpress-stubs": "^6.4",
+        "php-stubs/wp-cli-stubs": "^2.10",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^10.5",
+        "squizlabs/php_codesniffer": "^3.10"
+    },
+    "suggest": {
+        "ext-curl": "Streams answers token by token. Without it the plugin uses the WordPress HTTP API and replays a buffered answer.",
+        "indianopinion/llm-json-php": "Enables the buffered-json model caller (structured answer plus cited passage numbers)."
+    },
+    "autoload": {
+        "psr-4": {
+            "IndianOpinion\\SseChatWidget\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "IndianOpinion\\SseChatWidget\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:js": "node --test tests/js/widget.test.mjs",
+        "analyse": "phpstan analyse --memory-limit=1G",
+        "lint": "phpcs",
+        "check": ["@lint", "@analyse", "@test"]
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

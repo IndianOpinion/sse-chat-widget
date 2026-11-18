@@ -1,0 +1,28 @@
+parameters:
+    level: 8
+    paths:
+        - src
+        - sse-chat-widget.php
+        - uninstall.php
+        - autoload.php
+        - mu-plugin
+    scanFiles:
+        - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
+        - vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
+    bootstrapFiles:
+        - phpstan-constants.php
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        -
+            identifier: requireOnce.fileNotFound
+            path: src/Log/Schema.php
+        # The WordPress stubs type wpdb::prepare() as literal-string. Our
+        # queries interpolate only the table name, built from $wpdb->prefix
+        # and a fixed suffix; every value goes through a placeholder.
+        -
+            message: '#^Parameter \#1 \$query of method wpdb::prepare\(\) expects literal-string#'
+            paths:
+                - src/Log/WpdbLogStore.php
+                - src/Limits/WpdbCounterStore.php
+    parallel:
+        processTimeout: 900.0

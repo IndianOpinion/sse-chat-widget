@@ -17,8 +17,8 @@ uses [Semantic Versioning](https://semver.org/).
 - Stateless HMAC session tokens; server-held conversation history.
 - Request checks in a fixed order: enabled, origin, method and body,
   session, message, conversation, kill switch, verify filter, concurrency,
-  per-IP, per-session and daily limits, optional daily token cap and
-  optional spend-meter.
+  per-IP, per-session and daily limits (IPv6 counted per /64), optional
+  daily token cap and optional spend-meter (contract 1).
 - Atomic counters in the plugin's own table with an upsert.
 - Keyword retrieval through the core search query, over published posts
   only, with citation markers checked again when cited.

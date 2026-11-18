@@ -128,7 +128,7 @@ old value and shows an error. Defaults can be changed in code with
    size and JSON, configured, session, message, conversation, turn limit,
    kill switch, the `sse_chat_verify_request` filter, open streams, per-IP,
    per-session and daily counts (taken atomically before the call), the
-   daily token cap, and spend-meter when present. The first failure returns
+   daily token cap, and spend-meter when present (see below). The first failure returns
    `{"code", "message"}` with a status; nothing is streamed or spent.
 5. It sends `meta`, then searches published posts, builds the prompt from
    your template with the passages and the reader's message in separate
@@ -170,6 +170,16 @@ Filters: `sse_chat_settings_defaults`, `sse_chat_capability` (cap, context:
 
 Actions: `sse_chat_answer_completed`, `sse_chat_request_refused`,
 `sse_chat_kill_switch_changed`, `sse_chat_log_deleted`.
+
+spend-meter (optional, contract `SPEND_METER_API` = 1): before each answer
+the plugin applies `spend_meter_pre_spend` with purpose `chat`, caller
+`sse-chat-widget`, the provider host, the model, `est_input_tokens` and
+`max_output_tokens`. A `null` answer means no meter is listening and the
+plugin's own caps decide; any answer whose `allowed` is not exactly `true`
+refuses with `spend_denied`. Each attempt that reaches the provider fires
+`spend_meter_record` with the `reservation_id`; if no attempt starts,
+`spend_meter_release` fires once with the reservation id. The plugin's own
+caps and kill switch apply whether or not spend-meter is installed.
 
 Front end: CSS custom properties `--sse-chat-accent`, `--sse-chat-radius`,
 `--sse-chat-font`; DOM events `ssechat:open`, `ssechat:send`,
@@ -251,7 +261,8 @@ settings screen has a "Check anonymous REST access" button.
   The hash key is derived from the WordPress salts and rotates every
   calendar year (UTC): abuse can be grouped within a year, and hashes from
   different years cannot be joined. Rotating the salts invalidates sessions
-  and changes future hashes too.
+  and changes future hashes too. IPv6 readers are hashed and limited by
+  their /64 prefix, since one subscriber usually holds a whole /64.
 - The log holds what readers typed. Set a retention period that matches
   your privacy notice, and purge eligible rows from the log screen or with
   `wp sse-chat logs purge`. The plugin never deletes them on its own.

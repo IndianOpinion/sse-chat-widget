@@ -68,7 +68,9 @@ Goals:
    an optional buffered caller through `indianopinion/llm-json-php`, and a
    filter so a site can plug in its own caller.
 7. A pluggable retriever. A built-in keyword retriever that spends nothing,
-   and an optional vector retriever fed by another plugin's vectors.
+   and an optional vector retriever fed by another plugin's vectors
+   (roadmap: 0.1.0 ships the retriever filter and the index format only;
+   see section 4.7).
 8. Works behind page caches and CDNs without per-visitor HTML.
 
 Non-goals:
@@ -205,10 +207,12 @@ Nothing is streamed and no model is called.
     Because usage is only known after a call, this cap can be exceeded by
     the calls in flight at the moment it is reached; the README says so.
 25. If spend-meter is active (`SPEND_METER_API` defined, contract 1), the
-    plugin asks `spend_meter_pre_spend` with purpose `chat`, caller
-    `sse-chat-widget`, provider, model, estimated input tokens and the
-    output token cap. Anything other than `allowed === true`: 503
-    `spend_denied`. The reader sees the paused message. The plugin keeps
+    plugin asks `spend_meter_pre_spend` with an intent array: purpose
+    `chat`, caller `sse-chat-widget`, provider, model, `est_input_tokens`
+    and `max_output_tokens` (the output token cap). A `null` answer means
+    no meter is listening: the plugin's own caps and kill switch are the
+    guard, and nothing is recorded with spend-meter. Any other answer
+    whose `allowed` is not exactly `true`: 503 `spend_denied`. The reader sees the paused message. The plugin keeps
     its own caps and kill switch even when spend-meter is present.
 26. Counters for cases 21 to 23 are incremented atomically before the
     model call (a reservation), not after. A request refused by a later
@@ -370,13 +374,25 @@ Nothing is streamed and no model is called.
     call and never loads the built-in caller or the library. A filter that
     returns something else is ignored, logged once per hour, and the
     built-in caller runs.
-60. After every call, if spend-meter granted a reservation, the plugin
-    sends exactly one `spend_meter_record` (status `ok`, `error_billed` or
-    `error_unbilled`, with tokens and HTTP status) or, if the call never
-    started, one `spend_meter_release`. A retry is recorded as its own
-    attempt with the same reservation id.
+60. After every call, if spend-meter allowed it, the plugin sends one
+    `spend_meter_record` per attempt that reached the provider (status
+    `ok`, `error_billed` or `error_unbilled`, with `reservation_id`,
+    tokens, HTTP status, attempt number and error code) or, if no attempt
+    started, one `spend_meter_release` with the reservation id as its only
+    argument. A retry is recorded as its own attempt with the same
+    reservation id.
 
 ### 4.7 Vector retriever and its index
+
+**Roadmap, not in 0.1.0.** Release 0.1.0 ships the `Retriever` interface,
+the `sse_chat_retriever` filter (any retriever, including a vector one
+from another plugin, is gated, deduplicated and falls back to keyword
+retrieval on a throw) and the packed index format with its header checks
+(the format half of case 64). Cases 61, 62, 63, 65 and 66, the rest of
+case 64 (scheduling a rebuild, chunked reads in the plugin), the case 37
+vector path and the case 40 vector bound wait for the built-in vector
+retriever. They stay here as the specification for that release. See
+ARCHITECTURE.md, ruling Q6.
 
 61. The vector retriever needs two things from other code: the
     `sse_chat_post_vectors` filter, which yields `(post_id, float[])` pairs
@@ -845,16 +861,16 @@ widget script has a small DOM test with a fake stream.
   option is hidden and falls back. (58)
 - T49. Custom caller from the filter is used; an invalid return is ignored
   and the built-in caller runs. (59)
-- T50. Query embedding counts against caps and kill switch as part of the
+- T50. (Roadmap.) Query embedding counts against caps and kill switch as part of the
   same message. (61)
-- T51. Index build writes header and records, uses temp file and rename;
+- T51. (Roadmap.) Index build writes header and records, uses temp file and rename;
   a reader during the build sees the old file. (62, 66)
-- T52. Index directory resolution prefers the constant, refuses the
+- T52. (Roadmap.) Index directory resolution prefers the constant, refuses the
   document root, and writes deny rules when it must use uploads. (63)
-- T53. Index with wrong tag, wrong version, wrong dimension, short header,
+- T53. (Format checks in 0.1.0; fallback and rebuild on the roadmap.) Index with wrong tag, wrong version, wrong dimension, short header,
   or partial record: unusable, keyword fallback, one rebuild scheduled.
   (64)
-- T54. Cosine scores, threshold, bounded heap top-k match a brute-force
+- T54. (Roadmap.) Cosine scores, threshold, bounded heap top-k match a brute-force
   sort on random data; peak memory under budget on 100,000 records. (65,
   40)
 - T55. Log modes: `full` stores text, `metadata` stores none, `off` writes

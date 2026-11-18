@@ -165,12 +165,34 @@ browser                              server
 - **The admin test question** runs the full path synchronously and shows
   the answer, sources and assembled prompt when it finishes, rather than
   streaming into the settings screen.
-- **Spend-meter contract.** Written from the PRD only: filter
-  `spend_meter_pre_spend(null, array args)` returning `{allowed,
-  reservation}`; actions `spend_meter_record(array)` per attempt and
-  `spend_meter_release(array)` when no call starts. Anything but
-  `allowed === true` refuses (fail closed). If the released spend-meter
-  contract differs, only `SpendMeterBridge` changes.
+- **Spend-meter contract.** Checked against spend-meter 0.1.0 (its README
+  and PRD sections 5.2 and 5.3). `SpendMeterBridge` applies
+  `spend_meter_pre_spend(null, $intent)` with `purpose`, `caller`,
+  `provider` (the base URL host as a lower-case slug), `model`,
+  `est_input_tokens` and `max_output_tokens`. A `null` result means no
+  meter is listening: the plugin's own caps decide and nothing is
+  recorded. Any other result whose `allowed` is not exactly `true` refuses
+  with `spend_denied` (fail closed). After an allow, each attempt that
+  reached the provider fires `spend_meter_record` with `reservation_id`,
+  `status` (`ok`, `error_billed`, `error_unbilled`), tokens,
+  `http_status`, `attempt`, `error_code` and `latency_ms`; when no attempt
+  started, `spend_meter_release` fires once with the reservation id
+  string. Never both for one reservation.
+- **Timeouts.** Each model attempt is given the seconds left before the
+  stream deadline (`ChatRequest::$timeoutSeconds`), and the built-in and
+  buffered callers never wait longer, so a slow provider cannot hold the
+  PHP worker past the maximum stream duration even on the non-streaming
+  transport, which cannot be polled.
+- **IPv6 limits.** IPv6 addresses are hashed and limited by their /64
+  prefix (IPv4-mapped addresses as the IPv4 address), because a single
+  subscriber usually holds a whole /64.
+- **Prompt material.** Passage titles, dates and excerpts, and the context
+  post title, are collapsed to one line and bracketed numbers in them
+  become parentheses, so post text cannot open a new numbered passage or
+  plant a citation marker.
+- **Forget during a stream.** The working history is written back at the
+  end of an answer only if it still exists, so a forget that lands while
+  an answer streams is not undone.
 - **Reader user id.** REST cookie auth drops the user without a nonce, and
   cached pages cannot carry one, so the logged-in cookie is validated
   directly for logging the user id only. It grants nothing.
@@ -200,7 +222,7 @@ be read in chunks of 256.
 
 ## Testing
 
-- `tests/Unit` (84 tests) run on a stub layer (`tests/stubs/`) with fakes
+- `tests/Unit` (92 tests) run on a stub layer (`tests/stubs/`) with fakes
   for the counter store, working state, log, clock, caller and transport.
   No network.
 - `tests/Db` (13 tests) run against a real MySQL or MariaDB: the upsert,

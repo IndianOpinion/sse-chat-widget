@@ -1,0 +1,44 @@
+.sse-chat {
+  --sse-chat-accent: #1d4ed8;
+  --sse-chat-radius: 8px;
+  --sse-chat-font: inherit;
+  --sse-chat-bg: #fff;
+  --sse-chat-fg: #111;
+  --sse-chat-muted: #555;
+  font-family: var(--sse-chat-font);
+  color: var(--sse-chat-fg);
+}
+.sse-chat__panel {
+  background: var(--sse-chat-bg);
+  border: 1px solid #ccc;
+  border-radius: var(--sse-chat-radius);
+  padding: 1rem;
+  max-width: 40rem;
+}
+.sse-chat__title { font-size: 1.1rem; margin: 0 0 .5rem; }
+.sse-chat__log { max-height: 28rem; overflow-y: auto; }
+.sse-chat__question { font-weight: 600; margin: .75rem 0 .25rem; white-space: pre-wrap; }
+.sse-chat__text p { margin: 0 0 .6rem; white-space: pre-wrap; }
+.sse-chat__status, .sse-chat__disclaimer, .sse-chat__note { color: var(--sse-chat-muted); font-size: .9rem; }
+.sse-chat__note--error { color: #b91c1c; }
+.sse-chat__sources-label { font-size: .85rem; margin: .25rem 0 0; color: var(--sse-chat-muted); }
+.sse-chat__sources { font-size: .9rem; margin: .25rem 0 .75rem 1.2rem; padding: 0; }
+.sse-chat__cite { text-decoration: none; font-size: .85em; }
+.sse-chat__form { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+.sse-chat__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sse-chat__input { flex: 1 1 16rem; font: inherit; padding: .5rem; border: 1px solid #999; border-radius: var(--sse-chat-radius); resize: vertical; }
+.sse-chat button {
+  font: inherit; cursor: pointer; padding: .45rem .9rem; border-radius: var(--sse-chat-radius);
+  border: 1px solid var(--sse-chat-accent); background: var(--sse-chat-accent); color: #fff;
+}
+.sse-chat__actions button, .sse-chat__stop { background: transparent; color: var(--sse-chat-accent); }
+.sse-chat__actions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .5rem; }
+.sse-chat button:disabled { opacity: .55; cursor: default; }
+.sse-chat :focus-visible { outline: 3px solid var(--sse-chat-accent); outline-offset: 2px; }
+.sse-chat [hidden] { display: none !important; }
+.sse-chat--launcher { position: fixed; right: 1rem; bottom: 1rem; z-index: 9999; }
+.sse-chat--launcher .sse-chat__panel { width: min(26rem, calc(100vw - 2rem)); margin-bottom: .5rem; box-shadow: 0 6px 24px rgba(0,0,0,.18); transition: opacity .2s ease, transform .2s ease; }
+.sse-chat__launcher { border-radius: 999px !important; box-shadow: 0 4px 14px rgba(0,0,0,.2); float: right; }
+@media (prefers-reduced-motion: reduce) {
+  .sse-chat--launcher .sse-chat__panel { transition: none; }
+}

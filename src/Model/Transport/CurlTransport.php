@@ -27,6 +27,9 @@ final class CurlTransport implements Transport
 
     public function post(string $url, array $headers, string $body, callable $onChunk, callable $onIdle, int $timeoutSeconds): TransportResult
     {
+        if ($url === '') {
+            return new TransportResult(null, '', 'no endpoint URL');
+        }
         $handle = curl_init();
         if ($handle === false) {
             return new TransportResult(null, '', 'curl_init failed');

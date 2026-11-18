@@ -140,7 +140,7 @@ final class WpdbLogStore implements TurnLog
                 $cutoff,
                 self::BATCH
             ));
-            $ids = is_array($ids) ? array_map('strval', $ids) : [];
+            $ids = is_array($ids) ? array_values(array_map('strval', $ids)) : [];
             if ($ids !== []) {
                 $total += $this->deleteIds($ids);
             }
@@ -168,7 +168,7 @@ final class WpdbLogStore implements TurnLog
             "SELECT id FROM {$this->conversations} WHERE user_id = %d",
             $wpUserId
         ));
-        $ids = is_array($ids) ? array_map('strval', $ids) : [];
+        $ids = is_array($ids) ? array_values(array_map('strval', $ids)) : [];
         $n = $ids === [] ? 0 : $this->deleteIds($ids);
         $this->auditDeletion($n, $route, $actingUserId, 'user=' . $wpUserId);
         return $n;

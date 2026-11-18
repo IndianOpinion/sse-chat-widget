@@ -13,7 +13,7 @@ use IndianOpinion\SseChatWidget\Model\Transport\TransportResult;
  */
 final class FakeTransport implements Transport
 {
-    /** @var list<array{url: string, headers: array<string, string>, body: string}> */
+    /** @var list<array{url: string, headers: array<string, string>, body: string, timeout: int}> */
     public array $requests = [];
     public int $chunksRead = 0;
 
@@ -37,7 +37,7 @@ final class FakeTransport implements Transport
 
     public function post(string $url, array $headers, string $body, callable $onChunk, callable $onIdle, int $timeoutSeconds): TransportResult
     {
-        $this->requests[] = ['url' => $url, 'headers' => $headers, 'body' => $body];
+        $this->requests[] = ['url' => $url, 'headers' => $headers, 'body' => $body, 'timeout' => $timeoutSeconds];
         for ($i = 0; $i < $this->idlePolls; $i++) {
             if ($onIdle()) {
                 return new TransportResult($this->status, '', null, true);

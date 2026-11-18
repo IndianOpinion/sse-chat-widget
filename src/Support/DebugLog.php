@@ -21,7 +21,7 @@ final class DebugLog
     public static function line(string $text): void
     {
         if (self::enabled()) {
-            error_log('[sse-chat] ' . $text);
+            error_log('[sse-chat] ' . self::oneLine($text));
         }
     }
 
@@ -41,6 +41,15 @@ final class DebugLog
             return;
         }
         set_transient($tkey, 1, $window);
-        error_log('[sse-chat] ' . $text);
+        error_log('[sse-chat] ' . self::oneLine($text));
+    }
+
+    /**
+     * One log line: control characters (newlines included) become spaces, so
+     * text that came from a request cannot forge extra log lines.
+     */
+    private static function oneLine(string $text): string
+    {
+        return (string) preg_replace('/[\x00-\x1F\x7F]+/', ' ', $text);
     }
 }

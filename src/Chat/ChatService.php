@@ -273,6 +273,7 @@ final class ChatService
         }
 
         $spendReservation = null;
+        $spendMetered = false;
         if (SpendMeterBridge::active()) {
             $estimate = (int) ceil((strlen($this->settings->string('prompt_template')) + strlen($message)) / 4)
                 + $this->settings->int('passages') * $this->settings->int('passage_words') * 2
@@ -282,6 +283,9 @@ final class ChatService
                 $reservation->release();
                 throw new Refusal(503, 'spend_denied', $this->settings->displayString('paused'));
             }
+            // A null answer means no meter is listening: the plugin's own caps
+            // and kill switch, already checked, are the only guard.
+            $spendMetered = $answer['present'];
             $spendReservation = $answer['reservation'];
         }
 
@@ -317,7 +321,8 @@ final class ChatService
             $ipHash,
             $request->userId,
             $spendReservation,
-            $notes
+            $notes,
+            $spendMetered
         );
     }
 
@@ -490,7 +495,7 @@ final class ChatService
             }
             $outcome = 'no_context';
             $this->stats->bump('no_context');
-            if (SpendMeterBridge::active()) {
+            if ($req->spendMetered) {
                 $this->spend->release($req->spendReservation);
             }
             $emitter->event('citations', ['sources' => [], 'related' => []]);
@@ -505,7 +510,6 @@ final class ChatService
             $historyForModel = $window > 0 ? array_slice($previousHistory, -$window) : [];
             $messages = $builder->messages($passages, $req->contextPost, $historyForModel, $req->message);
             $this->lastPrompt = $messages;
-            $chat = new ChatRequest($messages, $this->settings->string('model'), $this->settings->int('max_tokens'), $this->settings->float('temperature'));
 
             $shouldStop = function () use ($emitter, $deadline, &$stopReason): bool {
                 if ($stopReason !== null) {
@@ -527,11 +531,22 @@ final class ChatService
             };
 
             $attempt = 0;
+            $spendRecorded = false;
             do {
                 $attempt++;
+                // The upstream timeout never runs past the stream deadline (case 49),
+                // so a slow provider cannot hold the worker beyond it.
+                $remaining = max(1, (int) ceil($deadline - $this->clock->micro()));
+                $chat = new ChatRequest($messages, $this->settings->string('model'), $this->settings->int('max_tokens'), $this->settings->float('temperature'), $remaining);
+                $callStartedAt = $this->clock->micro();
                 $result = $this->callSafely($caller, $chat, $onDelta, $shouldStop);
-                $this->recordSpend($req, $result);
+                $latencyMs = (int) round(($this->clock->micro() - $callStartedAt) * 1000);
+                $spendRecorded = $this->recordSpend($req, $result, $attempt, $latencyMs) || $spendRecorded;
             } while ($attempt < 2 && $result->retryable() && $stopReason === null && $text === '');
+            if (!$spendRecorded && $req->spendMetered) {
+                // No attempt reached the provider: give the reservation back once.
+                $this->spend->release($req->spendReservation);
+            }
 
             $outcome = $this->finishStream($emitter, $result, $stopReason, $passages, $tracker, $text, $notes);
         }
@@ -544,8 +559,9 @@ final class ChatService
             }
         }
 
-        // Working history (case 29).
-        if ($history) {
+        // Working history (case 29). A forget during the stream cleared the
+        // state; writing it back would make a hidden conversation usable again.
+        if ($history && $this->state->get($req->conversationId) !== null) {
             $state['history'] = array_slice(array_merge($previousHistory, [
                 ['role' => 'user', 'content' => $req->message],
                 ['role' => 'assistant', 'content' => $text],
@@ -704,14 +720,14 @@ final class ChatService
         }
     }
 
-    private function recordSpend(CheckedRequest $req, ChatResult $result): void
+    /**
+     * Record one attempt with spend-meter (case 60). Returns false when the
+     * attempt never started, so nothing was recorded.
+     */
+    private function recordSpend(CheckedRequest $req, ChatResult $result, int $attempt, int $latencyMs): bool
     {
-        if (!SpendMeterBridge::active()) {
-            return;
-        }
-        if (!$result->started) {
-            $this->spend->release($req->spendReservation);
-            return;
+        if (!$req->spendMetered || !$result->started) {
+            return false;
         }
         if ($result->errorCode === null) {
             $status = 'ok';
@@ -727,8 +743,12 @@ final class ChatService
             $result->outputTokens,
             $result->httpStatus,
             $this->provider(),
-            $this->settings->string('model')
+            $this->settings->string('model'),
+            $attempt,
+            $result->errorCode,
+            $latencyMs
         );
+        return true;
     }
 
     private function writeLog(TurnRecord $turn): void

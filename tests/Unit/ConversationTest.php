@@ -131,4 +131,28 @@ final class ConversationTest extends TestCase
         $foreign = $service->forget($this->request('POST', (string) json_encode(['session' => $token, 'conversation' => $conversation]), ['origin' => 'https://evil.example']));
         self::assertSame(403, $foreign['status']);
     }
+
+    /** Case 86: a forget that lands while an answer streams is not undone when the answer ends. */
+    public function testForgetDuringStreamIsNotUndone(): void
+    {
+        $this->seedPosts();
+        $service = $this->service();
+        $token = $this->token($service);
+        [, $e] = $this->ask(['session' => $token, 'message' => 'river dam'], [], ['REMOTE_ADDR' => '203.0.113.7'], $service);
+        $conversation = (string) $e->of('meta')[0]['conversation'];
+        $state = $this->state;
+        $this->caller = new ScriptedCaller([[
+            'chunks' => ['still ', 'going [1]'],
+            'beforeChunk' => static function (int $i) use ($state, $conversation): void {
+                if ($i === 1) {
+                    $state->delete($conversation);
+                }
+            },
+        ]]);
+        [$r] = $this->ask(['session' => $token, 'message' => 'and then', 'conversation' => $conversation], [], ['REMOTE_ADDR' => '203.0.113.7'], $service);
+        self::assertNull($r);
+        self::assertArrayNotHasKey($conversation, $this->state->items, 'the end of the stream did not bring the history back');
+        [$again] = $this->ask(['session' => $token, 'message' => 'more', 'conversation' => $conversation], [], ['REMOTE_ADDR' => '203.0.113.7'], $service);
+        self::assertSame(404, $again?->status);
+    }
 }

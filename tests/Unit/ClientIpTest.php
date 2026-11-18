@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace IndianOpinion\SseChatWidget\Tests\Unit;
 
 use IndianOpinion\SseChatWidget\Http\ClientIp;
+use IndianOpinion\SseChatWidget\Session\Keys;
 use IndianOpinion\SseChatWidget\Tests\TestCase;
 
 /** T25, case 27. */
@@ -57,5 +58,16 @@ final class ClientIpTest extends TestCase
         self::assertTrue(ClientIp::validRange('10.0.0.0/8'));
         self::assertFalse(ClientIp::validRange('10.0.0.0/33'));
         self::assertFalse(ClientIp::validRange('example.org'));
+    }
+
+    /** Case 27 and 69: one IPv6 /64 is one bucket; IPv4-mapped addresses count as IPv4. */
+    public function testIpv6IsBucketedByPrefix(): void
+    {
+        $t = 1_700_000_000;
+        self::assertSame(Keys::ipHash('2001:db8:1:2::1', $t), Keys::ipHash('2001:db8:1:2:ffff:eeee:dddd:1', $t));
+        self::assertNotSame(Keys::ipHash('2001:db8:1:2::1', $t), Keys::ipHash('2001:db8:1:3::1', $t));
+        self::assertSame(Keys::ipHash('203.0.113.7', $t), Keys::ipHash('::ffff:203.0.113.7', $t));
+        self::assertNotSame(Keys::ipHash('203.0.113.7', $t), Keys::ipHash('203.0.113.8', $t));
+        self::assertSame(16, strlen(Keys::ipHash('2001:db8::1', $t)));
     }
 }

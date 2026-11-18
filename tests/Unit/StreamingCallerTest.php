@@ -176,4 +176,29 @@ final class StreamingCallerTest extends TestCase
         self::assertSame('ä' . str_repeat('ö', 50), implode('', Replay::pieces('ä' . str_repeat('ö', 50))));
         self::assertInstanceOf(ScriptedCaller::class, ScriptedCaller::answer('x'));
     }
+
+    /** Case 49: the upstream timeout never runs past the time left before the stream deadline. */
+    public function testTransportTimeoutIsCappedByTheRequest(): void
+    {
+        $transport = new FakeTransport(true, 200, ["data: [DONE]\n\n"]);
+        $caller = new StreamingCaller($transport, 'https://llm.example.net/v1', 'k', 95);
+        $caller->stream(new ChatRequest([['role' => 'user', 'content' => 'q']], 'm', 100, 0.3, 12), static function (): void {
+        }, static fn (): bool => false);
+        $caller->stream(new ChatRequest([['role' => 'user', 'content' => 'q']], 'm', 100, 0.3), static function (): void {
+        }, static fn (): bool => false);
+        self::assertSame([12, 95], array_column($transport->requests, 'timeout'));
+    }
+
+    /** Secrets in logs: a provider error body that echoes the key is scrubbed before it is logged. */
+    public function testProviderTextNeverCarriesTheKey(): void
+    {
+        $key = 'sk-live-0123456789abcdef';
+        $body = '{"error":{"message":"Bad key ' . $key . ' (Authorization: Bearer ' . $key . ')"}}';
+        $caller = new StreamingCaller(new FakeTransport(true, 401, [], $body), 'https://llm.example.net/v1', $key, 90);
+        $result = $caller->stream($this->chatRequest(), static function (): void {
+        }, static fn (): bool => false);
+        self::assertSame('provider_auth', $result->errorCode);
+        self::assertStringNotContainsString($key, (string) $result->providerMessage);
+        self::assertStringContainsString('[key]', (string) $result->providerMessage);
+    }
 }

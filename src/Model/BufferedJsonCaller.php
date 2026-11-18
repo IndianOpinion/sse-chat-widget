@@ -42,7 +42,8 @@ final class BufferedJsonCaller implements ModelCaller, ReportsBuffering
         $messages = $request->messages;
         $messages[] = ['role' => 'system', 'content' => self::FORMAT_NOTE];
         try {
-            $reply = $this->asker->ask($messages, self::SCHEMA, $request->maxOutputTokens, $request->temperature, $this->deadlineSeconds);
+            $deadline = $request->timeoutSeconds !== null ? max(1, min($this->deadlineSeconds, $request->timeoutSeconds)) : $this->deadlineSeconds;
+            $reply = $this->asker->ask($messages, self::SCHEMA, $request->maxOutputTokens, $request->temperature, $deadline);
         } catch (CallerFailure $e) {
             return ChatResult::failure($e->errorCode, $e->httpStatus, $e->getMessage());
         }

@@ -21,7 +21,7 @@ final class SpendMeterTest extends TestCase
         $asked = [];
         add_filter('spend_meter_pre_spend', static function ($v, array $args) use (&$asked) {
             $asked[] = $args;
-            return ['allowed' => false];
+            return ['allowed' => false, 'reason' => 'cap_site_day', 'reservation_id' => null];
         }, 10, 2);
         $caller = ScriptedCaller::answer('x');
         $this->caller = $caller;
@@ -31,17 +31,51 @@ final class SpendMeterTest extends TestCase
         self::assertSame('chat', $asked[0]['purpose']);
         self::assertSame('sse-chat-widget', $asked[0]['caller']);
         self::assertSame('llm.example.net', $asked[0]['provider']);
-        self::assertSame(600, $asked[0]['output_tokens']);
+        self::assertSame(600, $asked[0]['max_output_tokens']);
+        self::assertIsInt($asked[0]['est_input_tokens']);
+        self::assertArrayNotHasKey('input_tokens', $asked[0]);
         self::assertSame(0, $this->counters->total('day:messages'), 'reservation released');
     }
 
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
-    public function testUnavailableMeterFailsClosed(): void
+    public function testMalformedAnswerFailsClosed(): void
     {
         define('SPEND_METER_API', 1);
+        add_filter('spend_meter_pre_spend', static fn () => 'yes');
         [$r] = $this->ask(['message' => 'river dam']);
         self::assertSame('spend_denied', $r?->errorCode);
+        self::assertSame([], $this->caller instanceof ScriptedCaller ? $this->caller->requests : []);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testNullAnswerMeansNoMeterAndOwnCapsApply(): void
+    {
+        define('SPEND_METER_API', 1);
+        $this->seedPosts();
+        [$r, $e] = $this->ask(['message' => 'river dam']);
+        self::assertNull($r);
+        self::assertSame('The dam opened in 2019 [1].', $e->text());
+        self::assertSame([], did_action_with('spend_meter_record'), 'no meter answered, so nothing is recorded with it');
+        self::assertSame([], did_action_with('spend_meter_release'));
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testNoReleaseAfterARecordedAttempt(): void
+    {
+        define('SPEND_METER_API', 1);
+        $this->seedPosts();
+        add_filter('spend_meter_pre_spend', static fn () => ['allowed' => true, 'reason' => 'ok', 'reservation_id' => 'r-2']);
+        // First attempt reaches the provider and fails; the retry never starts.
+        $this->caller = new ScriptedCaller([
+            ['chunks' => [], 'result' => ['error' => 'provider_down', 'status' => 502]],
+            ['chunks' => [], 'result' => ['error' => 'provider_down', 'status' => null, 'started' => false]],
+        ]);
+        $this->ask(['message' => 'river dam']);
+        self::assertCount(1, did_action_with('spend_meter_record'));
+        self::assertSame([], did_action_with('spend_meter_release'), 'exactly one of record or release per reservation');
     }
 
     #[RunInSeparateProcess]
@@ -50,7 +84,7 @@ final class SpendMeterTest extends TestCase
     {
         define('SPEND_METER_API', 1);
         $this->seedPosts();
-        add_filter('spend_meter_pre_spend', static fn () => ['allowed' => true, 'reservation' => 'r-1']);
+        add_filter('spend_meter_pre_spend', static fn () => ['allowed' => true, 'reason' => 'ok', 'reservation_id' => 'r-1']);
         $this->caller = new ScriptedCaller([
             ['chunks' => [], 'result' => ['error' => 'provider_down', 'status' => 503]],
             ['chunks' => ['ok [1]'], 'result' => ['input' => 10, 'output' => 3]],
@@ -58,13 +92,16 @@ final class SpendMeterTest extends TestCase
         $this->ask(['message' => 'river dam']);
         $records = did_action_with('spend_meter_record');
         self::assertCount(2, $records);
-        self::assertSame(['r-1', 'error_unbilled'], [$records[0][0]['reservation'], $records[0][0]['status']]);
-        self::assertSame(['r-1', 'ok', 10, 3], [$records[1][0]['reservation'], $records[1][0]['status'], $records[1][0]['input_tokens'], $records[1][0]['output_tokens']]);
+        self::assertSame(['r-1', 'error_unbilled', 1, 'provider_down'], [$records[0][0]['reservation_id'], $records[0][0]['status'], $records[0][0]['attempt'], $records[0][0]['error_code']]);
+        self::assertSame(['r-1', 'ok', 10, 3, 2], [$records[1][0]['reservation_id'], $records[1][0]['status'], $records[1][0]['input_tokens'], $records[1][0]['output_tokens'], $records[1][0]['attempt']]);
+        self::assertSame('llm.example.net', $records[0][0]['provider']);
         self::assertSame([], did_action_with('spend_meter_release'));
 
         // No passages: the call never starts, one release.
         $this->ask(['message' => 'quantum chromodynamics']);
-        self::assertCount(1, did_action_with('spend_meter_release'));
+        $releases = did_action_with('spend_meter_release');
+        self::assertCount(1, $releases);
+        self::assertSame('r-1', $releases[0][0], 'the release action takes the reservation id as a string');
         self::assertCount(2, did_action_with('spend_meter_record'));
     }
 }

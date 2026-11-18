@@ -8,12 +8,14 @@ final class ChatRequest
 {
     /**
      * @param list<array{role: string, content: string}> $messages
+     * @param int|null $timeoutSeconds Seconds left before the stream deadline; a caller must not wait longer.
      */
     public function __construct(
         public readonly array $messages,
         public readonly string $model,
         public readonly int $maxOutputTokens,
         public readonly float $temperature,
+        public readonly ?int $timeoutSeconds = null,
     ) {
     }
 }

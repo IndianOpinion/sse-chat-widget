@@ -30,6 +30,7 @@ final class CheckedRequest
         public readonly int $userId,
         public readonly ?string $spendReservation,
         public readonly array $notes,
+        public readonly bool $spendMetered = false,
     ) {
     }
 }

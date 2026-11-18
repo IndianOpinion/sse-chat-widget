@@ -67,7 +67,8 @@ final class StreamingCaller implements ModelCaller, ReportsBuffering
             return !$shouldStop();
         };
 
-        $result = $this->transport->post($this->endpoint(), $headers, $body, $onChunk, $shouldStop, $this->timeoutSeconds);
+        $timeout = $request->timeoutSeconds !== null ? max(1, min($this->timeoutSeconds, $request->timeoutSeconds)) : $this->timeoutSeconds;
+        $result = $this->transport->post($this->endpoint(), $headers, $body, $onChunk, $shouldStop, $timeout);
 
         if ($streaming && $result->status === 200 && !$state->done && $state->errorCode === null && !$result->aborted) {
             foreach ($parser->finish() as $data) {
@@ -85,7 +86,7 @@ final class StreamingCaller implements ModelCaller, ReportsBuffering
             return $state->result(null, 'stop', 'provider_down', $result->error ?? 'no response');
         }
         if ($result->status !== 200) {
-            $text = self::providerText($result->body);
+            $text = $this->scrubbed($result->body);
             return $state->result($result->status, 'stop', ErrorMapper::fromStatus($result->status, $result->body), $text);
         }
         if ($result->error !== null && !$state->done) {
@@ -113,7 +114,7 @@ final class StreamingCaller implements ModelCaller, ReportsBuffering
         }
         if (isset($json['error']) && is_array($json['error'])) {
             $state->errorCode = ErrorMapper::fromErrorFrame($json['error']);
-            $state->providerMessage = self::providerText((string) json_encode($json['error']));
+            $state->providerMessage = $this->scrubbed((string) json_encode($json['error']));
             return;
         }
         if (isset($json['id']) && is_string($json['id']) && $state->requestId === null) {
@@ -143,7 +144,7 @@ final class StreamingCaller implements ModelCaller, ReportsBuffering
             return $state->result(200, 'stop', 'provider_down', 'unreadable response body');
         }
         if (isset($json['error']) && is_array($json['error'])) {
-            return $state->result(200, 'stop', ErrorMapper::fromErrorFrame($json['error']), self::providerText((string) json_encode($json['error'])));
+            return $state->result(200, 'stop', ErrorMapper::fromErrorFrame($json['error']), $this->scrubbed((string) json_encode($json['error'])));
         }
         if (isset($json['id']) && is_string($json['id'])) {
             $state->requestId = $json['id'];
@@ -161,6 +162,19 @@ final class StreamingCaller implements ModelCaller, ReportsBuffering
             $onDelta($piece);
         }
         return $state->result(200, $finish);
+    }
+
+    /**
+     * Provider error text with the key removed. Some providers echo part of
+     * the key or the Authorization header in an error body.
+     */
+    private function scrubbed(string $body): string
+    {
+        $text = self::providerText($body);
+        if (strlen($this->apiKey) >= 8) {
+            $text = str_replace($this->apiKey, '[key]', $text);
+        }
+        return (string) preg_replace('/\b(Bearer)\s+\S+/i', '$1 [key]', $text);
     }
 
     /**

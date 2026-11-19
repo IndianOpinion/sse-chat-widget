@@ -314,6 +314,10 @@ that streams with `data:` lines and ends with `data: [DONE]`.
 `IndianOpinion\SseChatWidget\Model\ModelCaller` from
 `sse_chat_model_caller`. See `examples/custom-caller.php`.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Licence
 
 MIT. Copyright (c) 2026 Indian Opinion. See [LICENSE](LICENSE).
